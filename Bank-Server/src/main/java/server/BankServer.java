@@ -1,3 +1,5 @@
+package server;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -7,15 +9,16 @@ public class BankServer implements BankServerInterface {
 
     BankServer() throws RemoteException {
         super();
+
     }
 
     public static void main(String[] args) {
         try {
             // First reset our Security manager
-            if (System.getSecurityManager() == null) {
-                System.setSecurityManager(new SecurityManager());
-                System.out.println("Security manager set");
-            }
+            //if (System.getSecurityManager() == null) {
+            //    System.setSecurityManager(new SecurityManager());
+            //    System.out.println("Security manager set");
+            //}
 
             // Create an instance of the local object
             BankServerInterface bankServer = new BankServer();

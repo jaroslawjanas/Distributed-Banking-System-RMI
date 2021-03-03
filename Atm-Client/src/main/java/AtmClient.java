@@ -1,3 +1,5 @@
+import server.BankServerInterface;
+
 import java.rmi.Naming;
 
 public class AtmClient {

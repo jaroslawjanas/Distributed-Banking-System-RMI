@@ -7,13 +7,15 @@
     <groupId>org.example</groupId>
     <artifactId>Distributed-Banking-System-RMI</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1</version>
     <modules>
         <module>Bank-Server</module>
         <module>Atm-Client</module>
     </modules>
 
+
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
