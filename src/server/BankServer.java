@@ -46,6 +46,10 @@ public class BankServer implements BankServerInterface {
         System.out.println("New Account created");
     }
 
+    public String ping(){
+        return "pong";
+    }
+
     @Override
     public String login(String username, String hashedPassword) throws RemoteException {
         System.out.println("User " + username + " has logged in!");
