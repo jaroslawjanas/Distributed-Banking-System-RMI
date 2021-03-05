@@ -29,5 +29,35 @@ public class AtmClient {
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
+
+        boolean exit = false;
+        while(!exit) {
+            String command = null;
+
+            System.out.print("> ");
+            try {
+                InputStreamReader inputStream = new InputStreamReader(System.in);
+                BufferedReader reader = new BufferedReader(inputStream);
+
+                command = reader.readLine();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if(command != null) {
+                String[] commandArgs = command.split(" ");
+
+                switch (commandArgs[0]) {
+                    case "exit":
+                        exit = true;
+                        break;
+
+                    default:
+                        System.out.println("[ Unrecognised command! ]");
+                }
+
+            }
+        }
     }
 }
