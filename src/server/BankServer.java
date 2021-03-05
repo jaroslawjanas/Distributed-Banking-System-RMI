@@ -4,8 +4,12 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BankServer implements BankServerInterface {
+
+    public List<Account> accounts = new ArrayList<>();
 
     BankServer() throws RemoteException {
         super();
@@ -34,6 +38,12 @@ public class BankServer implements BankServerInterface {
         {
             System.out.println("Error in main - " + exc.toString());
         }
+    }
+
+    public void createAccount(String username, String hashedPassword){
+        Account newAccount = new Account(username, hashedPassword);
+        accounts.add(newAccount);
+        System.out.println("New Account created");
     }
 
     @Override
