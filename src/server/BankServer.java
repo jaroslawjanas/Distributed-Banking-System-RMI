@@ -1,8 +1,8 @@
 package server;
 
-import server.errors.RemoteCreateAccountExists;
-import server.errors.RemoteIncorrectLoginError;
+import server.errors.*;
 import utils.Color;
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -49,16 +49,16 @@ public class BankServer implements BankServerInterface {
         return "pong";
     }
 
-    public void createAccount(String username, long hashedPassword) throws RemoteException{
+    public void createAccount(String username, long hashedPassword) throws RemoteException {
         for (Account account : accounts) {
-            if(account.getUsername().equalsIgnoreCase(username)) throw new RemoteCreateAccountExists();
+            if(account.getUsername().equalsIgnoreCase(username)) throw new CreateAccountExistsRemoteError();
         }
         Account newAccount = new Account(username, hashedPassword);
         accounts.add(newAccount);
         System.out.println(Color.YELLOW + "New Account \"" + username + "\" created" + Color.RESET);
     }
 
-    public Access login(String username, long hashedPassword) throws RemoteException{
+    public Access login(String username, long hashedPassword) throws RemoteException {
         for (Account account : accounts) {
             if(account.getUsername().equalsIgnoreCase(username) && account.getHashedPassword() == hashedPassword) {
                 System.out.println(Color.YELLOW + "User \"" + username + "\" has logged in" + Color.RESET);
@@ -72,12 +72,47 @@ public class BankServer implements BankServerInterface {
             }
         }
 
-        throw new RemoteIncorrectLoginError();
+        throw new IncorrectLoginRemoteError();
     }
 
     private long randomSessionId(){
         long leftLimit = 100000000000L;
         long rightLimit = 100000000000000000L;
         return leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+    }
+
+    private Account verifyAccess(Access clientAccess) throws RemoteException {
+        for(Access serverAccess : accesses) {
+            if(serverAccess.getSessionId() == clientAccess.getSessionId()
+            && serverAccess.getAccountNumber() == clientAccess.getAccountNumber()
+            && serverAccess.getValidUntil().equals(clientAccess.getValidUntil())) {
+//                check if still valid
+                if(LocalDateTime.now().isBefore(serverAccess.getValidUntil())) {
+                    long accountNumber = serverAccess.getAccountNumber();
+                    for(Account account : accounts) {
+                        if(account.getAccountNumber() == accountNumber) {
+                            return account;
+                        }
+                    }
+                }
+                else {
+                    throw new AccessExpiredRemoteError();
+//                    Expired
+                }
+            }
+        }
+//        Could not find access obj
+        throw new AccessDeniedRemoteError();
+    }
+
+    public BigDecimal deposit(Access access, BigDecimal amount) throws RemoteException {
+        Account account = verifyAccess(access);
+        account.deposit(amount);
+        return account.getBalance();
+    }
+
+    public BigDecimal balance(Access access) throws RemoteException {
+        Account account = verifyAccess(access);
+        return account.getBalance();
     }
 }

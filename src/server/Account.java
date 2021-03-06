@@ -1,16 +1,16 @@
 package server;
 
-import server.errors.InputError;
+import server.errors.InputRemoteError;
 import server.errors.OverdraftError;
-
 import java.math.BigDecimal;
+import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
-    private static long newestAccount = 100000;
-    private final long accountNumber;
+    private static Long newestAccount = 100000L;
+    private final Long accountNumber;
     private final String username;
     private long hashedPassword;
     private List<Transaction> transactions;
@@ -21,29 +21,31 @@ public class Account {
         this.hashedPassword = hashedPassword;
         newestAccount++;
         accountNumber= newestAccount;
+        balance = new BigDecimal(0);
+        transactions = new ArrayList<>();
     }
 
-    public void deposit(BigDecimal deposit) throws InputError {
-        if (deposit.compareTo(BigDecimal.ZERO) > 0) { //ensure input is a positive number
-            balance = balance.add(deposit);
-            Transaction newTransaction = new Transaction(deposit, LocalDateTime.now(), "deposit");
+    public void deposit(BigDecimal amount) throws RemoteException {
+        if (amount.compareTo(BigDecimal.ZERO) > 0) { //ensure input is a positive number
+            balance = balance.add(amount);
+            Transaction newTransaction = new Transaction(amount, LocalDateTime.now(), "deposit");
             addTransaction(newTransaction);
         } else {
-            throw new InputError();
+            throw new InputRemoteError();
         }
     }
 
-    public void withdraw(BigDecimal withdraw) throws OverdraftError, InputError {
-        if (withdraw.compareTo(BigDecimal.ZERO) > 0) { //ensure input is a positive number
-            if(balance.subtract(withdraw).compareTo(BigDecimal.ZERO)>=0) { //ensure there is enough money in the account to perform withdrawal
-                balance = balance.subtract(withdraw);
-                Transaction newTransaction = new Transaction(withdraw.multiply(new BigDecimal(-1)), LocalDateTime.now(), "withdraw");
+    public void withdraw(BigDecimal amount) throws RemoteException {
+        if (amount.compareTo(BigDecimal.ZERO) > 0) { //ensure input is a positive number
+            if(balance.subtract(amount).compareTo(BigDecimal.ZERO)>=0) { //ensure there is enough money in the account to perform withdrawal
+                balance = balance.subtract(amount);
+                Transaction newTransaction = new Transaction(amount.multiply(new BigDecimal(-1)), LocalDateTime.now(), "withdraw");
                 addTransaction(newTransaction);
             } else{
                 throw new OverdraftError();
             }
         } else{
-            throw new InputError();
+            throw new InputRemoteError();
         }
     }
 
@@ -58,7 +60,7 @@ public class Account {
         return new Statement(statementTransactions);
     }
 
-    public void addTransaction(Transaction transaction){
+    private void addTransaction(Transaction transaction){
         transactions.add(transaction);
     }
 
