@@ -57,6 +57,7 @@ public class AtmClient {
                     switch (commandArgs[0]) {
                         case "exit":
                             exit = true;
+                            System.out.println(Color.YELLOW + "Exiting..." + Color.RESET);
                             break;
 
                         case "login":

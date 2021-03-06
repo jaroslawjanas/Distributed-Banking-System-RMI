@@ -37,7 +37,7 @@ public class BankServer implements BankServerInterface {
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind("Bank", stub);
             System.out.println("Name rebind completed");
-            System.out.println(Color.GREEN + "Server ready for requests!" + Color.RESET);
+            System.out.println(Color.GREEN + "Server ready for requests" + Color.RESET);
         }
         catch(Exception exc)
         {
@@ -55,13 +55,13 @@ public class BankServer implements BankServerInterface {
         }
         Account newAccount = new Account(username, hashedPassword);
         accounts.add(newAccount);
-        System.out.println("New Account \"" + username + "\"created");
+        System.out.println(Color.YELLOW + "New Account \"" + username + "\" created" + Color.RESET);
     }
 
     public Access login(String username, long hashedPassword) throws RemoteException{
         for (Account account : accounts) {
             if(account.getUsername().equalsIgnoreCase(username) && account.getHashedPassword() == hashedPassword) {
-                System.out.println("User \"" + username + "\" has logged in!");
+                System.out.println(Color.YELLOW + "User \"" + username + "\" has logged in" + Color.RESET);
 
                 LocalDateTime validUntil = LocalDateTime.now().plusMinutes(10);
                 long sessionId = randomSessionId();
