@@ -1,6 +1,5 @@
 package client;
 
-import server.BankServer;
 import server.BankServerInterface;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,11 +52,31 @@ public class AtmClient {
                         exit = true;
                         break;
 
+                    case "login":
+                        if (commandArgs.length != 3) {
+                            System.out.println("[ Incorrect arguments! ]");
+                            break;
+                        }
+                        login(commandArgs[1], commandArgs[2]);
+                        break;
+
                     default:
                         System.out.println("[ Unrecognised command! ]");
                 }
 
             }
+        }
+    }
+
+    private static void login(String username, String password) {
+        try {
+            password = password.concat("salt_salt_salt");
+            int hashedPassword = password.hashCode();
+            bankServer.login(username, hashedPassword);
+
+        } catch (RemoteException e) {
+            System.out.println("[ Could not login! ]");
+            e.printStackTrace();
         }
     }
 }

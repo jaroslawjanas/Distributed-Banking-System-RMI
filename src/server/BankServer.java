@@ -51,7 +51,7 @@ public class BankServer implements BankServerInterface {
     }
 
     @Override
-    public String login(String username, String hashedPassword) throws RemoteException {
+    public String login(String username, int hashedPassword) throws RemoteException {
         System.out.println("User " + username + " has logged in!");
         return "Session id: Hello World!";
     }
