@@ -115,4 +115,10 @@ public class BankServer implements BankServerInterface {
         Account account = verifyAccess(access);
         return account.getBalance();
     }
+
+    public BigDecimal withdraw(Access access, BigDecimal amount) throws RemoteException {
+        Account account = verifyAccess(access);
+        account.withdraw(amount);
+        return account.getBalance();
+    }
 }

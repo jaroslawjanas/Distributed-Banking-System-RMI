@@ -1,7 +1,7 @@
 package server;
 
 import server.errors.InputRemoteError;
-import server.errors.OverdraftError;
+import server.errors.OverdraftRemoteError;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class Account {
                 Transaction newTransaction = new Transaction(amount.multiply(new BigDecimal(-1)), LocalDateTime.now(), "withdraw");
                 addTransaction(newTransaction);
             } else{
-                throw new OverdraftError();
+                throw new OverdraftRemoteError();
             }
         } else{
             throw new InputRemoteError();

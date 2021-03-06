@@ -14,4 +14,6 @@ public interface BankServerInterface extends Remote {
     BigDecimal deposit(Access access, BigDecimal amount) throws RemoteException;
 
     BigDecimal balance(Access access) throws RemoteException;
+
+    BigDecimal withdraw(Access access, BigDecimal amount) throws RemoteException;
 }
