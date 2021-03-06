@@ -1,8 +1,8 @@
 package server;
 
+import server.errors.RemoteCreateAccountExists;
 import server.errors.RemoteIncorrectLoginError;
 import utils.Color;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -50,6 +50,9 @@ public class BankServer implements BankServerInterface {
     }
 
     public void createAccount(String username, long hashedPassword) throws RemoteException{
+        for (Account account : accounts) {
+            if(account.getUsername().equalsIgnoreCase(username)) throw new RemoteCreateAccountExists();
+        }
         Account newAccount = new Account(username, hashedPassword);
         accounts.add(newAccount);
         System.out.println("New Account \"" + username + "\"created");

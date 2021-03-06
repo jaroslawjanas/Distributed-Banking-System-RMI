@@ -1,5 +1,6 @@
 package server;
 
+import server.errors.RemoteCreateAccountExists;
 import server.errors.RemoteIncorrectLoginError;
 
 import java.rmi.Remote;
