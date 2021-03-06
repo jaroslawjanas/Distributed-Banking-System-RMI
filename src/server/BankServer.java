@@ -1,5 +1,6 @@
 package server;
 
+import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -40,7 +41,7 @@ public class BankServer implements BankServerInterface {
         }
     }
 
-    public void createAccount(String username, String hashedPassword){
+    public void createAccount(String username, int hashedPassword){
         Account newAccount = new Account(username, hashedPassword);
         accounts.add(newAccount);
         System.out.println("New Account created");
@@ -51,8 +52,10 @@ public class BankServer implements BankServerInterface {
     }
 
     @Override
-    public String login(String username, int hashedPassword) throws RemoteException {
+    public Access login(String username, long hashedPassword) throws RemoteException {
         System.out.println("User " + username + " has logged in!");
-        return "Session id: Hello World!";
+//        for testing
+        return new Access(341244522,  214341412);
     }
+
 }

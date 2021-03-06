@@ -12,11 +12,11 @@ public class Account {
     public static long newestAccount = 100000;
     public long accountNumber;
     public String username;
-    public String hashedPassword;
+    public long hashedPassword;
     public List<Transaction> transactions;
     public BigDecimal balance;
 
-    public Account(String username, String hashedPassword){
+    public Account(String username, long hashedPassword){
         this.username = username;
         this.hashedPassword = hashedPassword;
         newestAccount++;

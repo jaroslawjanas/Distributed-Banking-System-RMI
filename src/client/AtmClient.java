@@ -1,5 +1,6 @@
 package client;
 
+import server.Access;
 import server.BankServerInterface;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.rmi.RemoteException;
 public class AtmClient {
 
     private static BankServerInterface bankServer;
+    private static Access access;
 
     public static void main (String[] args) {
 
@@ -71,8 +73,11 @@ public class AtmClient {
     private static void login(String username, String password) {
         try {
             password = password.concat("salt_salt_salt");
-            int hashedPassword = password.hashCode();
-            bankServer.login(username, hashedPassword);
+            long hashedPassword = password.hashCode();
+
+            access = bankServer.login(username, hashedPassword);
+            System.out.println("Account Number: " + access.getAccountNumber());
+            System.out.println("Session Id: " + access.getSessionId());
 
         } catch (RemoteException e) {
             System.out.println("[ Could not login! ]");
