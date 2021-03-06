@@ -1,7 +1,9 @@
 package client.errors;
 
+import utils.Color;
+
 public class ArgumentError extends Throwable {
     public ArgumentError() {
-        super("[ Incorrect arguments! ]");
+        super(Color.RED + "[ Incorrect arguments! ]" + Color.RESET);
     }
 }

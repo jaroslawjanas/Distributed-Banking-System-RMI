@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
-    public static long newestAccount = 100000;
-    public long accountNumber;
-    public String username;
-    public long hashedPassword;
-    public List<Transaction> transactions;
-    public BigDecimal balance;
+    private static long newestAccount = 100000;
+    private final long accountNumber;
+    private final String username;
+    private long hashedPassword;
+    private List<Transaction> transactions;
+    private BigDecimal balance;
 
     public Account(String username, long hashedPassword){
         this.username = username;
@@ -64,5 +64,17 @@ public class Account {
 
     public BigDecimal getBalance(){
         return balance;
+    }
+
+    public long getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public long getAccountNumber() {
+        return accountNumber;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

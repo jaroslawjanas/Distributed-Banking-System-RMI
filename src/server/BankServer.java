@@ -1,16 +1,20 @@
 package server;
 
-import java.math.BigInteger;
+import server.errors.RemoteIncorrectLoginError;
+import utils.Color;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BankServer implements BankServerInterface {
 
     public List<Account> accounts = new ArrayList<>();
+    public List<Access> accesses = new ArrayList<>();
 
     BankServer() throws RemoteException {
         super();
@@ -33,12 +37,16 @@ public class BankServer implements BankServerInterface {
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind("Bank", stub);
             System.out.println("Name rebind completed");
-            System.out.println("Server ready for requests!");
+            System.out.println(Color.GREEN + "Server ready for requests!" + Color.RESET);
         }
         catch(Exception exc)
         {
             System.out.println("Error in main - " + exc.toString());
         }
+    }
+
+    public String ping(){
+        return "pong";
     }
 
     public void createAccount(String username, long hashedPassword) throws RemoteException{
@@ -47,14 +55,26 @@ public class BankServer implements BankServerInterface {
         System.out.println("New Account \"" + username + "\"created");
     }
 
-    public String ping(){
-        return "pong";
+    public Access login(String username, long hashedPassword) throws RemoteException{
+        for (Account account : accounts) {
+            if(account.getUsername().equalsIgnoreCase(username) && account.getHashedPassword() == hashedPassword) {
+                System.out.println("User \"" + username + "\" has logged in!");
+
+                LocalDateTime validUntil = LocalDateTime.now().plusMinutes(10);
+                long sessionId = randomSessionId();
+
+                Access access = new Access(sessionId, account.getAccountNumber(), validUntil);
+                accesses.add(access);
+                return access;
+            }
+        }
+
+        throw new RemoteIncorrectLoginError();
     }
 
-    public Access login(String username, long hashedPassword) throws RemoteException {
-        System.out.println("User \"" + username + "\" has logged in!");
-//        for testing
-        return new Access(341244522,  214341412);
+    private long randomSessionId(){
+        long leftLimit = 100000000000L;
+        long rightLimit = 100000000000000000L;
+        return leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
     }
-
 }

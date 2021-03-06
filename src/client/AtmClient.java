@@ -4,6 +4,8 @@ import client.errors.ArgumentError;
 import client.errors.CommandError;
 import server.Access;
 import server.BankServerInterface;
+import utils.Color;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,7 +30,7 @@ public class AtmClient {
             String pingRes = bankServer.ping();
 
             System.out.println("Bank says \"" + pingRes + "\"");
-            System.out.println("Connection established");
+            System.out.println(Color.GREEN + "Connection established!" + Color.RESET);
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
         }
@@ -37,7 +39,7 @@ public class AtmClient {
         while(!exit) {
             String command = null;
 
-            System.out.print("> ");
+            System.out.print(Color.YELLOW + "> " + Color.RESET);
             try {
                 InputStreamReader inputStream = new InputStreamReader(System.in);
                 BufferedReader reader = new BufferedReader(inputStream);
@@ -70,7 +72,7 @@ public class AtmClient {
                         default:
                             throw new CommandError();
                     }
-                } catch (ArgumentError | CommandError e) {
+                } catch (ArgumentError | CommandError | RemoteException e) {
                     e.printStackTrace();
                 }
             }
@@ -81,25 +83,16 @@ public class AtmClient {
         return password.hashCode();
     }
 
-    private static void login(String username, String password) {
-        try {
-            access = bankServer.login(username, hashPassword(password));
-        } catch (RemoteException e) {
-            System.out.println("[ Could not login! ]");
-            e.printStackTrace();
-        }
+    private static void login(String username, String password) throws RemoteException {
+        access = bankServer.login(username, hashPassword(password));
 
-        System.out.println("Account Number: " + access.getAccountNumber());
+
+        System.out.println(Color.GREEN + "Account Number: " + access.getAccountNumber() + Color.RESET);
 //        System.out.println("Session Id: " + access.getSessionId()); // hidden
     }
 
-    private static void createAccount(String username, String password) {
-        try {
-            bankServer.createAccount(username, hashPassword(password));
-        } catch (RemoteException e) {
-            System.out.println("[ Could not create a new account! ]");
-            e.printStackTrace();
-        }
-        System.out.println("Created a new account. Use your username \"" + username + "\" to login.");
+    private static void createAccount(String username, String password) throws RemoteException {
+        bankServer.createAccount(username, hashPassword(password));
+        System.out.println(Color.GREEN + "Created a new account. Use your username \"" + username + "\" to login." + Color.RESET);
     }
 }
