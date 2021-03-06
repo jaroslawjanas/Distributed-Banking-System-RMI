@@ -41,19 +41,18 @@ public class BankServer implements BankServerInterface {
         }
     }
 
-    public void createAccount(String username, int hashedPassword){
+    public void createAccount(String username, long hashedPassword) throws RemoteException{
         Account newAccount = new Account(username, hashedPassword);
         accounts.add(newAccount);
-        System.out.println("New Account created");
+        System.out.println("New Account \"" + username + "\"created");
     }
 
     public String ping(){
         return "pong";
     }
 
-    @Override
     public Access login(String username, long hashedPassword) throws RemoteException {
-        System.out.println("User " + username + " has logged in!");
+        System.out.println("User \"" + username + "\" has logged in!");
 //        for testing
         return new Access(341244522,  214341412);
     }

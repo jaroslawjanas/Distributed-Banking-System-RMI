@@ -8,4 +8,6 @@ public interface BankServerInterface extends Remote {
 
     Access login(String username, long hashedPassword) throws RemoteException;
 
+    void createAccount(String username, long hashedPassword) throws RemoteException;
+
 }
