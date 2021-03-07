@@ -2,9 +2,11 @@ package client;
 
 import client.errors.ArgumentError;
 import client.errors.CommandError;
+import server.errors.DateRangeRemoteError;
 import client.errors.NotLoggedInError;
 import server.Access;
 import server.BankServerInterface;
+import server.Statement;
 import utils.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +16,9 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 
 public class AtmClient {
@@ -92,9 +97,14 @@ public class AtmClient {
                             withdraw(commandArgs[1]);
                             break;
 
-                        case"ping":
+                        case "ping":
                             if (commandArgs.length !=1) throw new ArgumentError();
                             ping();
+                            break;
+
+                        case "statement":
+                            if (commandArgs.length != 3) throw new ArgumentError();
+                            statement(commandArgs[1], commandArgs[2]);
                             break;
 
                         default:
@@ -162,5 +172,48 @@ public class AtmClient {
     private static void ping() throws RemoteException {
         String pingRes = bankServer.ping();
         System.out.println(Color.GREEN + "Bank says \"" + Color.YELLOW + pingRes + Color.GREEN + "\"" + Color.RESET);
+    }
+
+    private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError {
+        if(access == null) throw new NotLoggedInError();
+        LocalDateTime fromDate = stringToLocalDateTime(fromDateStr);
+        LocalDateTime toDate = stringToLocalDateTime(toDateStr);
+
+        System.out.println( Color.GREEN + "Getting account statement for time period from: " +
+                Color.YELLOW + localDateTimeToString(fromDate) + Color.GREEN + " to: " +
+                Color.YELLOW + localDateTimeToString(toDate) + Color.RESET
+        );
+
+        Statement statement = bankServer.statement(access, fromDate, toDate);
+        System.out.println(statement);
+    }
+
+    private static LocalDateTime stringToLocalDateTime(String str) {
+        if(str.equalsIgnoreCase("now")) {
+            return LocalDateTime.now();
+        }
+
+        if(str.equalsIgnoreCase("*")) {
+            return LocalDateTime.MIN;
+        }
+
+        LocalDateTime date = null;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            date = LocalDateTime.parse(str, formatter);
+        } catch (DateTimeParseException e) {
+            System.out.println(Color.RED + "[ Incorrect date format! The date must be in \"dd/MM/yyyy\" format. ]" + Color.RESET);
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
+    private static String localDateTimeToString(LocalDateTime date) {
+        if(date.isEqual(LocalDateTime.MIN)) {
+            return "*";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return date.format(formatter);
     }
 }

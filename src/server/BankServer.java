@@ -121,4 +121,10 @@ public class BankServer implements BankServerInterface {
         account.withdraw(amount);
         return account.getBalance();
     }
+
+    public Statement statement(Access access, LocalDateTime from, LocalDateTime to) throws RemoteException {
+        Account account = verifyAccess(access);
+        if(from.isAfter(to) || to.isAfter(LocalDateTime.now())) throw new DateRangeRemoteError();
+        return account.constructStatement(from, to);
+    }
 }
