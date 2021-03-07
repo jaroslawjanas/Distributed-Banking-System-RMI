@@ -46,7 +46,7 @@ public class BankServer implements BankServerInterface {
     }
 
     public String ping(){
-        return "pong";
+        return "Pong!";
     }
 
     public void createAccount(String username, long hashedPassword) throws RemoteException {

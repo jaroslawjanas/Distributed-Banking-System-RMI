@@ -28,9 +28,8 @@ public class AtmClient {
             bankServer = (BankServerInterface) Naming.lookup("//localhost/Bank");
 
             System.out.println("Pinging Bank...");
-            String pingRes = bankServer.ping();
+            ping();
 
-            System.out.println("Bank says \"" + pingRes + "\"");
             System.out.println(Color.GREEN + "Connection established!" + Color.RESET);
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
@@ -93,6 +92,11 @@ public class AtmClient {
                             withdraw(commandArgs[1]);
                             break;
 
+                        case"ping":
+                            if (commandArgs.length !=1) throw new ArgumentError();
+                            ping();
+                            break;
+
                         default:
                             throw new CommandError();
                     }
@@ -111,13 +115,13 @@ public class AtmClient {
         access = bankServer.login(username, hashPassword(password));
 
 
-        System.out.println(Color.GREEN + "Account Number: " + access.getAccountNumber() + Color.RESET);
+        System.out.println(Color.GREEN + "Account Number: " + Color.YELLOW + access.getAccountNumber() + Color.RESET);
 //        System.out.println("Session Id: " + access.getSessionId()); // hidden
     }
 
     private static void createAccount(String username, String password) throws RemoteException {
         bankServer.createAccount(username, hashPassword(password));
-        System.out.println(Color.GREEN + "Created a new account. Use your username \"" + username + "\" to login." + Color.RESET);
+        System.out.println(Color.GREEN + "Created a new account. Use your username \"" + Color.YELLOW + username + Color.GREEN + "\" to login." + Color.RESET);
     }
 
     private static void deposit(String amount) throws RemoteException, NotLoggedInError {
@@ -153,5 +157,10 @@ public class AtmClient {
         BigDecimal withdrawAmount = stringToBigDecimal(amount);
         BigDecimal newBalance = bankServer.withdraw(access, withdrawAmount);
         System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + newBalance + Color.RESET);
+    }
+
+    private static void ping() throws RemoteException {
+        String pingRes = bankServer.ping();
+        System.out.println(Color.GREEN + "Bank says \"" + Color.YELLOW + pingRes + Color.GREEN + "\"" + Color.RESET);
     }
 }
