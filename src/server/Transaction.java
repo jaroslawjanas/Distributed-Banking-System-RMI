@@ -6,12 +6,12 @@ import java.time.LocalDateTime;
 
 public class Transaction implements Serializable {
     // Needs some accessor methods to return information about the transaction
-    private BigDecimal money;
+    private BigDecimal amount;
     private LocalDateTime date;
     private String description;
 
-    public Transaction(BigDecimal money, LocalDateTime date, String description){
-        this.money = money;
+    public Transaction(BigDecimal amount, LocalDateTime date, String description){
+        this.amount = amount;
         this.date = date;
         this.description = description;
     }
@@ -21,7 +21,7 @@ public class Transaction implements Serializable {
     }
 
     public BigDecimal getAmount(){
-        return money;
+        return amount;
     }
 
     public String getDesctiprion(){
