@@ -1,9 +1,6 @@
 package client;
 
-import client.errors.ArgumentError;
-import client.errors.CommandError;
-import client.errors.NotLoggedInError;
-import client.errors.NumberError;
+import client.errors.*;
 import server.Access;
 import server.BankServerInterface;
 import server.Statement;
@@ -131,7 +128,7 @@ public class AtmClient {
                     }
                 } catch (RemoteException e) {
                     System.out.println(e.getCause().getMessage());
-                } catch (ArgumentError | CommandError | NotLoggedInError | NumberError | IOException e){
+                } catch (ArgumentError | CommandError | NotLoggedInError | NumberError | IOException | DateFormatError e){
                     System.out.println(e.getMessage());
                 }
             }
@@ -163,6 +160,7 @@ public class AtmClient {
 
     private static BigDecimal stringToBigDecimal(String number) throws NotLoggedInError, NumberError {
         if(access == null) throw new NotLoggedInError();
+        if(number.contains("e")) throw new NumberError(); //do not allow exponents
 
         BigDecimal decimalNumber = null;
         try {
@@ -193,7 +191,7 @@ public class AtmClient {
         System.out.println(Color.GREEN + "Server says \"" + Color.YELLOW + pingRes + Color.GREEN + "\"" + Color.RESET);
     }
 
-    private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError {
+    private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError, DateFormatError {
         if(access == null) throw new NotLoggedInError();
         LocalDateTime fromDate = stringToLocalDateTime(fromDateStr);
         LocalDateTime toDate = stringToLocalDateTime(toDateStr);
@@ -207,7 +205,7 @@ public class AtmClient {
         System.out.println(statement);
     }
 
-    private static LocalDateTime stringToLocalDateTime(String str) {
+    private static LocalDateTime stringToLocalDateTime(String str) throws DateFormatError {
         if(str.equalsIgnoreCase("now")) {
             return LocalDateTime.now();
         }
@@ -223,8 +221,7 @@ public class AtmClient {
             datetime = LocalDateTime.of(date, LocalDateTime.now().toLocalTime());
 
         } catch (DateTimeParseException e) {
-            System.out.println(Color.RED + "[ Incorrect date format! The date must be in \"dd/MM/yyyy\" format. ]" + Color.RESET);
-            System.out.println(e.getMessage());
+            throw new DateFormatError();
         }
 
         return datetime;
