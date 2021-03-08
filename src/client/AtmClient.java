@@ -2,11 +2,12 @@ package client;
 
 import client.errors.ArgumentError;
 import client.errors.CommandError;
-import server.errors.DateRangeRemoteError;
 import client.errors.NotLoggedInError;
+import client.errors.NumberError;
 import server.Access;
 import server.BankServerInterface;
 import server.Statement;
+import server.errors.*;
 import utils.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,12 +34,14 @@ public class AtmClient {
         try {
             bankServer = (BankServerInterface) Naming.lookup("//localhost/Bank");
 
-            System.out.println("Pinging Bank...");
-            ping();
+            System.out.println(Color.GREEN + "Pinging Bank Server...");
+            String pingRes = bankServer.ping();
 
-            System.out.println(Color.GREEN + "Connection established!" + Color.RESET);
+            System.out.println(Color.GREEN + "...Server says \"" + pingRes + "\"");
+            System.out.println(Color.WHITE + "...Server connection established!" + Color.RESET);
+            System.out.println(Color.BLUE + "Welcome to the bank of RMI!" + Color.RESET);
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         boolean exit = false;
@@ -53,7 +56,7 @@ public class AtmClient {
                 command = reader.readLine();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
 
             if(command != null) {
@@ -108,11 +111,18 @@ public class AtmClient {
                             statement(commandArgs[1], commandArgs[2]);
                             break;
 
+                        case "help":
+                            if (commandArgs.length != 1) throw new ArgumentError();
+                            help();
+                            break;
+
                         default:
                             throw new CommandError();
                     }
-                } catch (ArgumentError | CommandError | RemoteException | NotLoggedInError e) {
-                    e.printStackTrace();
+                } catch (RemoteException e) {
+                    System.out.println(e.getCause().getMessage());
+                } catch (ArgumentError | CommandError | NotLoggedInError | NumberError e){
+                    System.out.println(e.getMessage());
                 }
             }
         }
@@ -125,9 +135,7 @@ public class AtmClient {
     private static void login(String username, String password) throws RemoteException {
         access = bankServer.login(username, hashPassword(password));
 
-
         System.out.println(Color.GREEN + "Account Number: " + Color.YELLOW + access.getAccountNumber() + Color.RESET);
-//        System.out.println("Session Id: " + access.getSessionId()); // hidden
     }
 
     private static void createAccount(String username, String password) throws RemoteException {
@@ -135,23 +143,22 @@ public class AtmClient {
         System.out.println(Color.GREEN + "Created a new account. Use your username \"" + Color.YELLOW + username + Color.GREEN + "\" to login." + Color.RESET);
     }
 
-    private static void deposit(String amount) throws RemoteException, NotLoggedInError {
+    private static void deposit(String amount) throws RemoteException, NotLoggedInError, NumberError {
         if(access == null) throw new NotLoggedInError();
 
         BigDecimal depositAmount = stringToBigDecimal(amount);
         BigDecimal newBalance = bankServer.deposit(access, depositAmount);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + newBalance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + "€" + newBalance + Color.RESET);
     }
 
-    private static BigDecimal stringToBigDecimal(String number) throws NotLoggedInError {
+    private static BigDecimal stringToBigDecimal(String number) throws NotLoggedInError, NumberError {
         if(access == null) throw new NotLoggedInError();
 
         BigDecimal decimalNumber = null;
         try {
             decimalNumber = new BigDecimal(number);
         } catch (NumberFormatException e) {
-            System.out.println(Color.RED + "[ The amount must be a number! ]" + Color.RESET);
-            e.printStackTrace();
+            throw new NumberError();
         }
         return decimalNumber;
     }
@@ -159,15 +166,16 @@ public class AtmClient {
     private static void balance() throws RemoteException, NotLoggedInError {
         if(access == null) throw new NotLoggedInError();
         BigDecimal balance = bankServer.balance(access);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + balance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW  + "€" + balance + Color.RESET);
     }
 
-    private static void withdraw(String amount) throws NotLoggedInError, RemoteException {
+    private static void withdraw(String amount) throws NotLoggedInError, RemoteException, ArgumentError, NumberError {
         if(access == null) throw new NotLoggedInError();
 
         BigDecimal withdrawAmount = stringToBigDecimal(amount);
+        if(withdrawAmount==null) throw new ArgumentError();
         BigDecimal newBalance = bankServer.withdraw(access, withdrawAmount);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + newBalance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + "€" + newBalance + Color.RESET);
     }
 
     private static void ping() throws RemoteException {
@@ -206,7 +214,7 @@ public class AtmClient {
 
         } catch (DateTimeParseException e) {
             System.out.println(Color.RED + "[ Incorrect date format! The date must be in \"dd/MM/yyyy\" format. ]" + Color.RESET);
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return datetime;
@@ -218,5 +226,20 @@ public class AtmClient {
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return date.format(formatter);
+    }
+
+    private static void help(){
+        System.out.println(Color.GREEN +
+        "Bank System commands:\n"+
+        " > create [username] [password]  - Create a new user account\n"+
+        " > login [username] [password]   - Login to existing user account\n"+
+        " > balance                       - Returns current bank balance\n"+
+        " > deposit [amount]              - Deposit specified amount into account\n"+
+        " > withdraw [amount]             - Withdraw specified amount into account\n"+
+        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions\n"+
+        " > help                          - Returns list of all commands and their usages\n"+
+        " > ping                          - Test connection with the bank server\n"+
+        " > logout                        - Logout current user\n"+
+        " > exit                          - Exits the system" + Color.RESET);
     }
 }

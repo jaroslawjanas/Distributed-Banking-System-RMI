@@ -3,7 +3,7 @@ package server;
 import utils.Color;
 
 import java.io.Serializable;
-import java.text.DateFormat;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,19 +18,54 @@ public class Statement implements Serializable {
 
     @Override
     public String toString() {
+        BigDecimal totalBalance  = new BigDecimal(0);
+        BigDecimal totalWithdraw = new BigDecimal(0);
+        BigDecimal totalDeposit  = new BigDecimal(0);
         StringBuilder out = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#,###.00");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String totalBalanceAmount;
+
+        //header
+        out.append(Color.PURPLE).append("Transaction Date")
+                .append(Color.BBLUE).append("   Details").append(Color.RESET)
+                .append(Color.CYAN).append("\tWithdrawals").append("\tDeposits")
+                .append(Color.BGREEN).append("\tBalance")
+                .append(Color.RESET).append(System.lineSeparator());
 
         for (Transaction transaction:transactions) {
-            DecimalFormat df = new DecimalFormat("#,###.00");
-            String balance= df.format(transaction.getAmount());
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:MM");
             LocalDateTime date = transaction.getDate();
 
-            out.append(Color.PURPLE).append("Date: ").append(Color.YELLOW).append(date.format(formatter)).append("\t")
-                    .append(Color.CYAN).append(transaction.getDesctiprion()).append(" \t\t")
-                    .append(Color.YELLOW).append("€").append(balance).append(Color.RESET).append(System.lineSeparator());
+            //date and description
+            out.append(Color.YELLOW).append(date.format(formatter)).append("   ").append(Color.CYAN).append(transaction.getDesctiption());
+
+            String transactionAmount= df.format(transaction.getAmount());
+
+            if(transaction.getDesctiption().equals("deposit")){
+                totalDeposit = totalDeposit.add(transaction.getAmount());
+                totalBalance = totalBalance.add(transaction.getAmount());
+
+                // transaction amount with withdrawal/deposit spacing
+                out.append("\t\t\t").append(Color.YELLOW).append("€").append(transactionAmount).append("   ");
+            } else {
+                totalWithdraw = totalWithdraw.add(transaction.getAmount());
+                totalBalance = totalBalance.subtract(transaction.getAmount());
+
+                // transaction amount with withdrawal/deposit spacing
+                out.append("\t").append(Color.YELLOW).append("€").append(transactionAmount).append("  \t\t");
+            }
+
+            totalBalanceAmount = df.format(totalBalance);
+            //balance after this transaction
+            out.append("\t").append("€").append(totalBalanceAmount).append(Color.RESET).append(System.lineSeparator());
         }
+
+        //final balances
+        out.append("----------------------------------------------------------------------------\n")
+                .append(Color.CYAN).append("Closing Balances:").append("\t\t")
+                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append("\t")
+                .append(Color.YELLOW).append("€").append(df.format(totalDeposit)).append("\t")
+                .append(Color.YELLOW).append("€").append(df.format(totalBalance));
 
         return out.toString();
     }

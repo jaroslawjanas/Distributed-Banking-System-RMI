@@ -24,7 +24,7 @@ public class Transaction implements Serializable {
         return amount;
     }
 
-    public String getDesctiprion(){
+    public String getDesctiption(){
         return description;
     }
 
