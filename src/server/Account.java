@@ -2,13 +2,15 @@ package server;
 
 import server.errors.InputRemoteError;
 import server.errors.OverdraftRemoteError;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Account {
+public class Account implements Serializable {
     private static Long newestAccount = 100000L;
     private final Long accountNumber;
     private final String username;
