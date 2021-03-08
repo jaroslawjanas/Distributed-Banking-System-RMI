@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -197,16 +198,18 @@ public class AtmClient {
             return LocalDateTime.MIN;
         }
 
-        LocalDateTime date = null;
+        LocalDateTime datetime = null;
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            date = LocalDateTime.parse(str, formatter);
+            LocalDate date = LocalDate.parse(str, formatter);
+            datetime = LocalDateTime.of(date, LocalDateTime.now().toLocalTime());
+
         } catch (DateTimeParseException e) {
             System.out.println(Color.RED + "[ Incorrect date format! The date must be in \"dd/MM/yyyy\" format. ]" + Color.RESET);
             e.printStackTrace();
         }
 
-        return date;
+        return datetime;
     }
 
     private static String localDateTimeToString(LocalDateTime date) {
