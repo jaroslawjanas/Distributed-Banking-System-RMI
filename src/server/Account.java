@@ -39,7 +39,7 @@ public class Account {
         if (amount.compareTo(BigDecimal.ZERO) > 0) { //ensure input is a positive number
             if(balance.subtract(amount).compareTo(BigDecimal.ZERO)>=0) { //ensure there is enough money in the account to perform withdrawal
                 balance = balance.subtract(amount);
-                Transaction newTransaction = new Transaction(amount.multiply(new BigDecimal(-1)), LocalDateTime.now(), "withdraw");
+                Transaction newTransaction = new Transaction(amount, LocalDateTime.now(), "withdraw");
                 addTransaction(newTransaction);
             } else{
                 throw new OverdraftRemoteError();

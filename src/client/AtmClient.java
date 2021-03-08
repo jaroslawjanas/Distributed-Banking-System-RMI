@@ -148,7 +148,7 @@ public class AtmClient {
 
         BigDecimal depositAmount = stringToBigDecimal(amount);
         BigDecimal newBalance = bankServer.deposit(access, depositAmount);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + newBalance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + "€" + newBalance + Color.RESET);
     }
 
     private static BigDecimal stringToBigDecimal(String number) throws NotLoggedInError, NumberError {
@@ -166,7 +166,7 @@ public class AtmClient {
     private static void balance() throws RemoteException, NotLoggedInError {
         if(access == null) throw new NotLoggedInError();
         BigDecimal balance = bankServer.balance(access);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + balance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW  + "€" + balance + Color.RESET);
     }
 
     private static void withdraw(String amount) throws NotLoggedInError, RemoteException, ArgumentError, NumberError {
@@ -175,7 +175,7 @@ public class AtmClient {
         BigDecimal withdrawAmount = stringToBigDecimal(amount);
         if(withdrawAmount==null) throw new ArgumentError();
         BigDecimal newBalance = bankServer.withdraw(access, withdrawAmount);
-        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + newBalance + Color.RESET);
+        System.out.println(Color.GREEN + "Balance: " + Color.YELLOW + "€" + newBalance + Color.RESET);
     }
 
     private static void ping() throws RemoteException {
