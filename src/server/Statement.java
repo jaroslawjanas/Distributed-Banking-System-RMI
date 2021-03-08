@@ -63,7 +63,7 @@ public class Statement implements Serializable {
         //final balances
         out.append("----------------------------------------------------------------------------\n")
                 .append(Color.CYAN).append("Closing Balances:").append("\t\t")
-                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append("\t")
+                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append(" \t")
                 .append(Color.YELLOW).append("€").append(df.format(totalDeposit)).append("\t")
                 .append(Color.YELLOW).append("€").append(df.format(totalBalance));
 
