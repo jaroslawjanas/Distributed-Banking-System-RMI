@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,11 +46,13 @@ public class BankServer implements BankServerInterface {
             loadAccounts();
 
             Thread t = new Thread(() -> {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
                 while(true){
                     try {
                         Thread.sleep(10000);
                         saveAccounts();
-                        System.out.println(Color.YELLOW + "Saved accounts!" + Color.RESET);
+                        System.out.println(Color.YELLOW + "Saved accounts! " +
+                                Color.BYELLOW + " (" + LocalDateTime.now().format(formatter) + ")" + Color.RESET);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
