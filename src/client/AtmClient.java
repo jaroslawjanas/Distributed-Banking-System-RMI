@@ -4,7 +4,6 @@ import client.errors.*;
 import server.Access;
 import server.BankServerInterface;
 import server.Statement;
-import server.errors.*;
 import utils.Color;
 import java.io.BufferedReader;
 import java.io.IOException;

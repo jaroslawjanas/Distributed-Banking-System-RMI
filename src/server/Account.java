@@ -2,7 +2,6 @@ package server;
 
 import server.errors.InputRemoteError;
 import server.errors.OverdraftRemoteError;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;

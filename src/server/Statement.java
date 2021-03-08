@@ -1,7 +1,6 @@
 package server;
 
 import utils.Color;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

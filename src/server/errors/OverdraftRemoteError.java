@@ -1,7 +1,6 @@
 package server.errors;
 
 import utils.Color;
-
 import java.rmi.RemoteException;
 
 public class OverdraftRemoteError extends RemoteException {
