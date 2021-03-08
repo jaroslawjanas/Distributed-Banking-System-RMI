@@ -46,7 +46,7 @@ public class BankServer implements BankServerInterface {
     }
 
     public String ping(){
-        return "pong";
+        return "Pong!";
     }
 
     public void createAccount(String username, long hashedPassword) throws RemoteException {
@@ -120,5 +120,11 @@ public class BankServer implements BankServerInterface {
         Account account = verifyAccess(access);
         account.withdraw(amount);
         return account.getBalance();
+    }
+
+    public Statement statement(Access access, LocalDateTime from, LocalDateTime to) throws RemoteException {
+        Account account = verifyAccess(access);
+        if(from.isAfter(to) || to.isAfter(LocalDateTime.now())) throw new DateRangeRemoteError();
+        return account.constructStatement(from, to);
     }
 }
