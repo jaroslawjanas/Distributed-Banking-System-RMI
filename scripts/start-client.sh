@@ -1,1 +1,1 @@
-java -cp "../out/classes/server" -Djava.class.path=../out/classes client.AtmClient 
+java -cp "../out/classes/server" -Djava.class.path=../out/classes client.AtmClient
