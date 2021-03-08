@@ -53,7 +53,7 @@ public class Statement implements Serializable {
 
                 // transaction amount with withdrawal/deposit spacing
                 out.append("\t").append(Color.YELLOW).append("€").append(transactionAmount);
-                if(transactionAmount.length() < 6) out.append("\t\t\t");
+                if(transactionAmount.length() < 8) out.append("\t\t\t");
                 else out.append("\t\t");
             }
 
@@ -65,8 +65,11 @@ public class Statement implements Serializable {
         //final balances
         out.append("----------------------------------------------------------------------------\n")
                 .append(Color.CYAN).append("Closing Balances:").append("\t\t")
-                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append("  \t")
-                .append(Color.YELLOW).append("€").append(df.format(totalDeposit)).append("\t")
+                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append("\t");
+
+        if(totalWithdraw.toString().length() < 6) out.append("\t");
+
+        out.append(Color.YELLOW).append("€").append(df.format(totalDeposit)).append("\t")
                 .append(Color.YELLOW).append("€").append(df.format(totalBalance));
 
         return out.toString();
