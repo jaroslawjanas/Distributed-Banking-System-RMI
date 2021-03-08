@@ -22,22 +22,23 @@ public class Statement implements Serializable {
         BigDecimal totalWithdraw = new BigDecimal(0);
         BigDecimal totalDeposit  = new BigDecimal(0);
         StringBuilder out = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#,###.00");
+        DecimalFormat df = new DecimalFormat("#,##0.00");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         String totalBalanceAmount;
 
         //header
         out.append(Color.PURPLE).append("Transaction Date")
-                .append(Color.BBLUE).append("   Details").append(Color.RESET)
-                .append(Color.CYAN).append("\tWithdrawals").append("\tDeposits")
-                .append(Color.BGREEN).append("\tBalance")
+                .append(Color.CYAN).append("   Details").append(Color.RESET)
+                .append(Color.BBLUE).append("\tWithdrawals").append("\tDeposits").append(Color.RESET)
+                .append(Color.BGREEN).append("\tBalance").append(Color.RESET)
                 .append(Color.RESET).append(System.lineSeparator());
 
         for (Transaction transaction:transactions) {
             LocalDateTime date = transaction.getDate();
 
             //date and description
-            out.append(Color.YELLOW).append(date.format(formatter)).append("   ").append(Color.CYAN).append(transaction.getDesctiption());
+            out.append(Color.YELLOW).append(date.format(formatter)).append("   ")
+                    .append(Color.BWHITE).append(transaction.getDesctiption()).append(Color.RESET);
 
             String transactionAmount= df.format(transaction.getAmount());
 
@@ -63,7 +64,7 @@ public class Statement implements Serializable {
         //final balances
         out.append("----------------------------------------------------------------------------\n")
                 .append(Color.CYAN).append("Closing Balances:").append("\t\t")
-                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append(" \t")
+                .append(Color.YELLOW).append("€").append(df.format(totalWithdraw)).append("  \t")
                 .append(Color.YELLOW).append("€").append(df.format(totalDeposit)).append("\t")
                 .append(Color.YELLOW).append("€").append(df.format(totalBalance));
 
