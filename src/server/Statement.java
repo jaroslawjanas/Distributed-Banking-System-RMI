@@ -53,7 +53,9 @@ public class Statement implements Serializable {
                 totalBalance = totalBalance.subtract(transaction.getAmount());
 
                 // transaction amount with withdrawal/deposit spacing
-                out.append("\t").append(Color.YELLOW).append("€").append(transactionAmount).append("  \t\t");
+                out.append("\t").append(Color.YELLOW).append("€").append(transactionAmount);
+                if(transactionAmount.length() < 6) out.append("\t\t\t");
+                else out.append("\t\t");
             }
 
             totalBalanceAmount = df.format(totalBalance);
