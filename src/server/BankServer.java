@@ -5,6 +5,7 @@ import utils.Color;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -46,9 +47,9 @@ public class BankServer implements BankServerInterface {
             Thread t = new Thread(() -> {
                 while(true){
                     try {
+                        Thread.sleep(10000);
                         saveAccounts();
                         System.out.println(Color.YELLOW + "Saved accounts!" + Color.RESET);
-                        Thread.sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -123,6 +124,8 @@ public class BankServer implements BankServerInterface {
 
     public BigDecimal deposit(Access access, BigDecimal amount) throws RemoteException {
         Account account = verifyAccess(access);
+
+        isTwoDecimalPlaces(amount);
         account.deposit(amount);
 
         return account.getBalance();
@@ -135,6 +138,8 @@ public class BankServer implements BankServerInterface {
 
     public BigDecimal withdraw(Access access, BigDecimal amount) throws RemoteException {
         Account account = verifyAccess(access);
+
+        isTwoDecimalPlaces(amount);
         account.withdraw(amount);
 
         return account.getBalance();
@@ -144,6 +149,12 @@ public class BankServer implements BankServerInterface {
         Account account = verifyAccess(access);
         if(from.isAfter(to) || to.isAfter(LocalDateTime.now())) throw new DateRangeRemoteError();
         return account.constructStatement(from, to);
+    }
+
+    private void isTwoDecimalPlaces(BigDecimal amount) throws InputRemoteError {
+        String[] stringAmount = amount.toString().split("\\.");
+        if( stringAmount.length < 2) return;
+        if( stringAmount[1].length() > 2) throw new InputRemoteError();
     }
 
     private static void saveAccounts()  {
