@@ -1,13 +1,9 @@
 package client;
 
-import client.errors.ArgumentError;
-import client.errors.CommandError;
-import client.errors.NotLoggedInError;
-import client.errors.NumberError;
+import client.errors.*;
 import server.Access;
 import server.BankServerInterface;
 import server.Statement;
-import server.errors.*;
 import utils.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,16 +26,16 @@ public class AtmClient {
 
     public static void main (String[] args) {
 
-        System.out.println("Connecting to the Bank...");
+        System.out.println(Color.YELLOW + "Connecting to the Bank..." + Color.RESET);
         try {
             bankServer = (BankServerInterface) Naming.lookup("//localhost/Bank");
 
-            System.out.println(Color.GREEN + "Pinging Bank Server...");
-            String pingRes = bankServer.ping();
+            System.out.println(Color.YELLOW + "Pinging Bank Server..." + Color.RESET);
+            ping();
 
-            System.out.println(Color.GREEN + "...Server says \"" + pingRes + "\"");
-            System.out.println(Color.WHITE + "...Server connection established!" + Color.RESET);
-            System.out.println(Color.BLUE + "Welcome to the bank of RMI!" + Color.RESET);
+            System.out.println(Color.GREEN + "Server connection established!" + Color.RESET);
+            helloMsg();
+
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             System.out.println(e.getMessage());
         }
@@ -48,7 +44,7 @@ public class AtmClient {
         while(!exit) {
             String command = null;
 
-            System.out.print(Color.YELLOW + "> " + Color.RESET);
+            System.out.print(Color.YELLOW + "\n> " + Color.RESET);
             try {
                 InputStreamReader inputStream = new InputStreamReader(System.in);
                 BufferedReader reader = new BufferedReader(inputStream);
@@ -116,12 +112,22 @@ public class AtmClient {
                             help();
                             break;
 
+                        case "clear":
+                            if (commandArgs.length != 1) throw new ArgumentError();
+                            clearConsole();
+                            break;
+
+                        case "hello":
+                            if (commandArgs.length !=1) throw  new ArgumentError();
+                            helloMsg();
+                            break;
+
                         default:
                             throw new CommandError();
                     }
                 } catch (RemoteException e) {
                     System.out.println(e.getCause().getMessage());
-                } catch (ArgumentError | CommandError | NotLoggedInError | NumberError e){
+                } catch (ArgumentError | CommandError | NotLoggedInError | NumberError | IOException | DateFormatError e){
                     System.out.println(e.getMessage());
                 }
             }
@@ -153,6 +159,7 @@ public class AtmClient {
 
     private static BigDecimal stringToBigDecimal(String number) throws NotLoggedInError, NumberError {
         if(access == null) throw new NotLoggedInError();
+        if(number.contains("e")) throw new NumberError(); //do not allow exponents
 
         BigDecimal decimalNumber = null;
         try {
@@ -180,10 +187,10 @@ public class AtmClient {
 
     private static void ping() throws RemoteException {
         String pingRes = bankServer.ping();
-        System.out.println(Color.GREEN + "Bank says \"" + Color.YELLOW + pingRes + Color.GREEN + "\"" + Color.RESET);
+        System.out.println(Color.GREEN + "Server says \"" + Color.YELLOW + pingRes + Color.GREEN + "\"" + Color.RESET);
     }
 
-    private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError {
+    private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError, DateFormatError {
         if(access == null) throw new NotLoggedInError();
         LocalDateTime fromDate = stringToLocalDateTime(fromDateStr);
         LocalDateTime toDate = stringToLocalDateTime(toDateStr);
@@ -197,7 +204,7 @@ public class AtmClient {
         System.out.println(statement);
     }
 
-    private static LocalDateTime stringToLocalDateTime(String str) {
+    private static LocalDateTime stringToLocalDateTime(String str) throws DateFormatError {
         if(str.equalsIgnoreCase("now")) {
             return LocalDateTime.now();
         }
@@ -213,8 +220,7 @@ public class AtmClient {
             datetime = LocalDateTime.of(date, LocalDateTime.now().toLocalTime());
 
         } catch (DateTimeParseException e) {
-            System.out.println(Color.RED + "[ Incorrect date format! The date must be in \"dd/MM/yyyy\" format. ]" + Color.RESET);
-            System.out.println(e.getMessage());
+            throw new DateFormatError();
         }
 
         return datetime;
@@ -236,10 +242,52 @@ public class AtmClient {
         " > balance                       - Returns current bank balance\n"+
         " > deposit [amount]              - Deposit specified amount into account\n"+
         " > withdraw [amount]             - Withdraw specified amount into account\n"+
-        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions\n"+
-        " > help                          - Returns list of all commands and their usages\n"+
+        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions, date format: dd/MM/yyyy\n"+
+        " > help                          - Displays this message\n"+
         " > ping                          - Test connection with the bank server\n"+
         " > logout                        - Logout current user\n"+
-        " > exit                          - Exits the system" + Color.RESET);
+        " > exit                          - Exits the system\n"+
+        " > clear                         - Clears the console\n"+
+        " > hello                         - Displays the welcome message"+ Color.RESET);
+    }
+
+    private static void helloMsg() {
+        System.out.println(
+                Color.BGREEN + "                          __                    __\n" +
+                Color.BGREEN + "          __       __     \\_\\  __          __   \\_\\  __   __       __\n" +
+                Color.BGREEN + "          \\_\\     /_/        \\/_/         /_/      \\/_/   \\_\\     /_/\n" +
+                Color.BGREEN + "        .-.  \\.-./  .-.   .-./  .-.   .-./  .-.   .-\\   .-.  \\.-./  .-.\n" +
+                Color.BGREEN + "       //-\\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\_// \\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\\n" +
+                Color.BGREEN + "     __(   '-'   '-'\\  '-'   '-'  /'-'   '-'\\__'-'   '-'__/'-'   '-'\\__\n" +
+                Color.BGREEN + "    /_/))            \\__       __/\\          \\_\\       /_/           \\_\\\n" +
+                Color.BGREEN + " ___\\_//              \\_\\     /_/  \\__\n" +
+                Color.BGREEN + "/_/  ((                             \\_\\\n" +
+                Color.BGREEN + "      )) __         \n" +
+                Color.BGREEN + "__   // /_/     " + Color.RESET + Color.YELLOW + "         ___       __   __         ___    ___  __   \n" +
+                Color.BGREEN + "\\_\\_((_/___   " + Color.RESET + Color.YELLOW + "     |  | |__  |    /  ` /  \\  |\\/| |__      |  /  \\  \n" +
+                Color.BGREEN + "     ))  \\_\\  " + Color.RESET + Color.YELLOW + "     |/\\| |___ |___ \\__, \\__/  |  | |___     |  \\__/ \n" +
+                Color.BGREEN + "     \\\\\n" +
+                Color.BGREEN + "      )) __     " + Color.RESET + Color.YELLOW + "                   ___       ___      \n" +
+                Color.BGREEN + "__   // /_/     " + Color.RESET + Color.YELLOW + "                    |  |__| |__      \n" +
+                Color.BGREEN + "\\_\\_((_/___   " + Color.RESET + Color.YELLOW + "                      |  |  | |___  \n" +
+                Color.BGREEN + "     ))  \\_\\    \n" +
+                Color.BGREEN + "     \\\\       " + Color.RESET + Color.YELLOW + "      __                     __   ___     __          \n" +
+                Color.BGREEN + "      )) _      " + Color.RESET + Color.YELLOW + "   |__)  /\\  |\\ | |__/    /  \\ |__     |__)  |\\/| | \n" +
+                Color.BGREEN + "__   // /_/     " + Color.RESET + Color.YELLOW + "   |__) /~~\\ | \\| |  \\    \\__/ |       |  \\  |  | | \n" +
+                Color.BGREEN + "\\_\\_((_/___\n" +
+                Color.BGREEN + "     ))  \\_\\                __                    __\n" +
+                Color.BGREEN + "     \\\\     __       __     \\_\\  __          __   \\_\\  __   __       __\n" +
+                Color.BGREEN + "  __  ))    \\_\\     /_/        \\/_/         /_/      \\/_/   \\_\\     /_/\n" +
+                Color.BGREEN + "  \\_\\_((   .-.  \\.-./  .-.   .-./  .-.   .-./  .-.   .-\\   .-.  \\.-./  .-.\n" +
+                Color.BGREEN + "       \\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\_// \\\\_//-\\\\_//-\\\\_//-\\\\_//-\\\\\n" +
+                Color.BGREEN + "        '  \\__'-'   '-'\\  '-'   '-'  /'-'   '-'\\__'-'   '-'__/'-'   '-'\\__\n" +
+                Color.BGREEN + "            \\_\\         \\__       __/\\          \\_\\       /_/           \\_\\\n" +
+                Color.BGREEN + "                         \\_\\     /_/  \\__\n" +
+                Color.BGREEN + "                                       \\_\\" + Color.RESET);
+    }
+
+    private static void clearConsole() throws IOException {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 }

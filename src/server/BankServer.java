@@ -2,19 +2,22 @@ package server;
 
 import server.errors.*;
 import utils.Color;
+
+import java.io.*;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BankServer implements BankServerInterface {
 
-    public List<Account> accounts = new ArrayList<>();
-    public List<Access> accesses = new ArrayList<>();
+    public static List<Account> accounts = new ArrayList<>();
+    public static List<Access> accesses = new ArrayList<>();
 
     BankServer() throws RemoteException {
         super();
@@ -38,10 +41,26 @@ public class BankServer implements BankServerInterface {
             registry.rebind("Bank", stub);
             System.out.println("Name rebind completed");
             System.out.println(Color.GREEN + "Server ready for requests" + Color.RESET);
+            System.out.println(Color.YELLOW + "Loading accounts..." + Color.RESET);
+            loadAccounts();
+
+            Thread t = new Thread(() -> {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                while(true){
+                    try {
+                        Thread.sleep(10000);
+                        saveAccounts();
+                        System.out.println(Color.YELLOW + "Saved accounts! " +
+                                Color.BYELLOW + " (" + LocalDateTime.now().format(formatter) + ")" + Color.RESET);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            t.start();
         }
-        catch(Exception exc)
-        {
-            System.out.println("Error in main - " + exc.toString());
+        catch( RemoteException e ) {
+            e.printStackTrace();
         }
     }
 
@@ -107,7 +126,10 @@ public class BankServer implements BankServerInterface {
 
     public BigDecimal deposit(Access access, BigDecimal amount) throws RemoteException {
         Account account = verifyAccess(access);
+
+        isTwoDecimalPlaces(amount);
         account.deposit(amount);
+
         return account.getBalance();
     }
 
@@ -118,7 +140,10 @@ public class BankServer implements BankServerInterface {
 
     public BigDecimal withdraw(Access access, BigDecimal amount) throws RemoteException {
         Account account = verifyAccess(access);
+
+        isTwoDecimalPlaces(amount);
         account.withdraw(amount);
+
         return account.getBalance();
     }
 
@@ -126,5 +151,42 @@ public class BankServer implements BankServerInterface {
         Account account = verifyAccess(access);
         if(from.isAfter(to) || to.isAfter(LocalDateTime.now())) throw new DateRangeRemoteError();
         return account.constructStatement(from, to);
+    }
+
+    private void isTwoDecimalPlaces(BigDecimal amount) throws InputRemoteError {
+        String[] stringAmount = amount.toString().split("\\.");
+        if( stringAmount.length < 2) return;
+        if( stringAmount[1].length() > 2) throw new InputRemoteError();
+    }
+
+    private static void saveAccounts()  {
+        try {
+            File file = new File("../save/accounts.sr");
+            FileOutputStream fout = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fout);
+
+            oos.writeObject(accounts);
+
+            oos.close();
+            fout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void loadAccounts() {
+        try {
+            File file = new File("../save/accounts.sr");
+            if(!file.exists()) return;
+
+            FileInputStream fin = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fin);
+            accounts = (List<Account>) ois.readObject();
+
+            ois.close();
+            fin.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
