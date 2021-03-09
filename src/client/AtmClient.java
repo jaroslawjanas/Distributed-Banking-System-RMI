@@ -15,6 +15,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -192,8 +193,8 @@ public class AtmClient {
 
     private static void statement(String fromDateStr, String toDateStr) throws RemoteException, NotLoggedInError, DateFormatError {
         if(access == null) throw new NotLoggedInError();
-        LocalDateTime fromDate = stringToLocalDateTime(fromDateStr);
-        LocalDateTime toDate = stringToLocalDateTime(toDateStr);
+        LocalDateTime fromDate = stringToLocalDateTime(fromDateStr, true);
+        LocalDateTime toDate = stringToLocalDateTime(toDateStr, false);
 
         System.out.println( Color.GREEN + "Getting account statement for time period from: " +
                 Color.YELLOW + localDateTimeToString(fromDate) + Color.GREEN + " to: " +
@@ -204,7 +205,7 @@ public class AtmClient {
         System.out.println(statement);
     }
 
-    private static LocalDateTime stringToLocalDateTime(String str) throws DateFormatError {
+    private static LocalDateTime stringToLocalDateTime(String str, boolean fromDate) throws DateFormatError {
         if(str.equalsIgnoreCase("now")) {
             return LocalDateTime.now();
         }
@@ -217,7 +218,16 @@ public class AtmClient {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate date = LocalDate.parse(str, formatter);
-            datetime = LocalDateTime.of(date, LocalDateTime.now().toLocalTime());
+
+            // if today return now
+            if(date.equals(LocalDate.now())) datetime = LocalDateTime.now();
+            // otherwise return 0:00 or 23:59 time depending if "from" or "to"
+            else {
+                if(fromDate)
+                    datetime = LocalDateTime.of(date, LocalTime.MIN);
+                else
+                    datetime = LocalDateTime.of(date, LocalTime.MAX);
+            }
 
         } catch (DateTimeParseException e) {
             throw new DateFormatError();
@@ -242,7 +252,7 @@ public class AtmClient {
         " > balance                       - Returns current bank balance\n"+
         " > deposit [amount]              - Deposit specified amount into account\n"+
         " > withdraw [amount]             - Withdraw specified amount into account\n"+
-        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions, date format: dd/MM/yyyy\n"+
+        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions or use the following date format: dd/MM/yyyy\n"+
         " > help                          - Displays this message\n"+
         " > ping                          - Test connection with the bank server\n"+
         " > logout                        - Logout current user\n"+
