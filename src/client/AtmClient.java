@@ -232,7 +232,7 @@ public class AtmClient {
         } catch (DateTimeParseException e) {
             throw new DateFormatError();
         }
-        
+
         return datetime;
     }
 
@@ -252,7 +252,7 @@ public class AtmClient {
         " > balance                       - Returns current bank balance\n"+
         " > deposit [amount]              - Deposit specified amount into account\n"+
         " > withdraw [amount]             - Withdraw specified amount into account\n"+
-        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions, date format: dd/MM/yyyy\n"+
+        " > statement [from] [to]         - Creates a statement between specified dates. Use inputs \"* now\" to return all transactions or use the following date format: dd/MM/yyyy\n"+
         " > help                          - Displays this message\n"+
         " > ping                          - Test connection with the bank server\n"+
         " > logout                        - Logout current user\n"+
